@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true, // send the httpOnly cookie with every request
+  baseURL: `${import.meta.env.VITE_API_URL}/api`,
+  withCredentials: true,
 });
 
 // Turn any failed request into a plain Error with the server's message
@@ -12,6 +12,7 @@ api.interceptors.response.use(
     const message =
       error.response?.data?.message ||
       "Cannot reach the server. Is the backend running?";
+
     return Promise.reject(new Error(message));
   },
 );
