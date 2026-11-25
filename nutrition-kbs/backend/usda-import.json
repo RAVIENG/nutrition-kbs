@@ -1,0 +1,14 @@
+{
+  "fdcId": 2708414,
+  "name": "Brown rice, cooked (no added fat)",
+  "category": "lunch",
+  "mealTypes": ["lunch", "dinner"],
+  "foodGroup": "cereal",
+  "dietType": "vegan",
+  "allergens": [],
+  "region": "Pan-India",
+  "serving": {
+    "description": "100 g cooked",
+    "grams": 100
+  }
+}
