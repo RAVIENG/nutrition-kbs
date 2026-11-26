@@ -27,12 +27,6 @@ import Recommendations from "./pages/Recommendations";
 
 // Normal application pages
 const appRoutes = [
-  { path: "kitchen", title: "My Kitchen", phase: "Phase 9" },
-  {
-    path: "kitchen/suggestions",
-    title: "Kitchen Recipe Suggestions",
-    phase: "Phase 9",
-  },
   {
     path: "budget",
     title: "Budget-Based Diet Planner",
