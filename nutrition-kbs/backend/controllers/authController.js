@@ -55,6 +55,12 @@ export const getMe = asyncHandler(async (req, res) => {
 
 // POST /api/auth/forgot-password
 export const forgotPassword = asyncHandler(async (req, res) => {
+  // Reset links are only exposed through the local development console until
+  // email delivery is configured. Never put reset tokens in hosted logs.
+  if (process.env.NODE_ENV !== "development" || process.env.RENDER === "true") {
+    throw new ApiError(503, "Password reset email delivery is not configured.");
+  }
+
   const user = await User.findOne({ email: req.body.email });
 
   if (user) {

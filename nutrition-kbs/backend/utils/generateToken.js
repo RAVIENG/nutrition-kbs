@@ -1,11 +1,13 @@
 import jwt from "jsonwebtoken";
 
 const COOKIE_NAME = "token";
+const isProduction =
+  process.env.NODE_ENV === "production" || process.env.RENDER === "true";
 
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.COOKIE_SECURE === "true",
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  sameSite: isProduction ? "none" : "lax",
 };
 
 export const sendTokenCookie = (res, userId) => {

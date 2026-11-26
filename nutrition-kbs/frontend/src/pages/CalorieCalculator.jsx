@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 import useProfile from "../hooks/useProfile";
@@ -14,11 +14,12 @@ const empty = {
 };
 
 export default function CalorieCalculator() {
-  const { profile, options, loading: profileLoading } = useProfile();
+  const { profile, options, loading: profileLoading, error: profileError } = useProfile();
   const [form, setForm] = useState(empty);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [calculating, setCalculating] = useState(false);
+  const autoCalculatedProfile = useRef("");
 
   const calculate = async (values) => {
     setError("");
@@ -50,7 +51,11 @@ export default function CalorieCalculator() {
       "weightKg",
       "activityLevel",
     ].every((f) => profile[f]);
-    if (complete) calculate({}); // the backend uses the saved profile
+    const profileKey = [profile.age, profile.gender, profile.heightCm, profile.weightKg, profile.activityLevel].join("|");
+    if (complete && autoCalculatedProfile.current !== profileKey) {
+      autoCalculatedProfile.current = profileKey;
+      calculate({}); // the backend uses the saved profile
+    }
   }, [profile]);
 
   const handleChange = (e) =>
@@ -73,12 +78,13 @@ export default function CalorieCalculator() {
   if (!options)
     return (
       <div className="alert alert-danger">
-        Could not load options. Is the backend running?
+        {profileError || "Profile options are unavailable."}
       </div>
     );
 
   return (
     <div style={{ maxWidth: 900 }}>
+      {profileError && <div className="alert alert-warning" role="status">Some profile data could not be loaded: {profileError}</div>}
       <h2 className="fw-bold mb-1">Calorie Calculator</h2>
       <p className="text-muted">
         Estimates how many calories your body uses in a day. Starts from your{" "}

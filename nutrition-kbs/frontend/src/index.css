@@ -216,3 +216,157 @@ body {
   border-right: 5px solid transparent;
   border-top: 6px solid var(--green-dark);
 }
+
+.nutrition-chat {
+  max-width: 920px;
+  margin: 0 auto;
+}
+.nutrition-chat-messages {
+  min-height: 320px;
+  max-height: min(58vh, 620px);
+  overflow-y: auto;
+  background: #fbfcfb;
+}
+.nutrition-chat-avatar {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.nutrition-chat-avatar.assistant {
+  background: var(--green-light);
+  color: var(--green-dark);
+}
+.nutrition-chat-avatar.user {
+  background: #e9eef5;
+  color: #35465b;
+}
+.nutrition-chat-bubble {
+  max-width: min(78%, 680px);
+  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+}
+.nutrition-chat-bubble.assistant {
+  background: #fff;
+  border: 1px solid #e6ece8;
+}
+.nutrition-chat-bubble.user {
+  background: var(--green-primary);
+  color: #fff;
+}
+.nutrition-chat-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 575.98px) {
+  .nutrition-chat-messages {
+    min-height: 260px;
+    max-height: 55vh;
+  }
+  .nutrition-chat-bubble {
+    max-width: 88%;
+  }
+}
+
+.budget-meter {
+  height: 12px;
+  overflow: hidden;
+  background: #e7eee9;
+  border-radius: 999px;
+}
+.budget-meter-fill {
+  height: 100%;
+  background: var(--green-primary);
+  border-radius: inherit;
+  transition: width 0.25s ease;
+}
+.budget-alternative {
+  padding: 0.55rem 0.7rem;
+  background: var(--green-light);
+  border-radius: 8px;
+}
+
+.daily-tracking {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.nutrition-target-card {
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e6ece8;
+  border-radius: 12px;
+}
+.nutrition-progress {
+  height: 8px;
+  overflow: hidden;
+  background: #e7eee9;
+  border-radius: 999px;
+}
+.nutrition-progress > div {
+  height: 100%;
+  background: var(--green-primary);
+  border-radius: inherit;
+  transition: width 0.2s ease;
+}
+.nutrition-entry {
+  padding: 0.75rem;
+  background: #fbfcfb;
+  border: 1px solid #e8eeea;
+  border-radius: 10px;
+}
+.nutrition-modal-backdrop {
+  position: fixed;
+  z-index: 1080;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  overflow-y: auto;
+  background: rgb(16 28 20 / 56%);
+}
+.nutrition-modal {
+  width: min(100%, 680px);
+  max-height: min(90vh, 900px);
+  overflow-y: auto;
+  background: #fff;
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / 20%);
+}
+.nutrition-search-results {
+  display: grid;
+  gap: 0.5rem;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.nutrition-search-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  color: inherit;
+  text-align: left;
+  background: #fff;
+  border: 1px solid #e3e9e5;
+  border-radius: 9px;
+}
+.nutrition-search-option:hover,
+.nutrition-search-option.selected {
+  background: #f0f7f2;
+  border-color: var(--green-primary);
+}
+@media (max-width: 575.98px) {
+  .nutrition-modal-backdrop {
+    align-items: end;
+    padding: 0;
+  }
+  .nutrition-modal {
+    width: 100%;
+    max-height: 92vh;
+    padding: 1rem !important;
+    border-radius: 16px 16px 0 0 !important;
+  }
+}

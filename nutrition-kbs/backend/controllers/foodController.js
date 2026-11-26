@@ -8,6 +8,7 @@ import { allowedDietTypes } from "../utils/diet.js";
 import { DEFAULT_PRICE_REGION } from "../utils/constants.js";
 
 import { attachPrices } from "../services/foodService.js";
+import { foodRegionFilter } from "../utils/foodFilters.js";
 
 // Query values must be plain strings
 const str = (value) => (typeof value === "string" ? value : undefined);
@@ -22,6 +23,7 @@ const FOOD_FIELDS = [
   "foodGroup",
   "dietType",
   "allergens",
+  "ingredients",
   "serving",
   "per100g",
   "region",
@@ -86,7 +88,7 @@ export const listFoods = asyncHandler(async (req, res) => {
 
   if (mealType) filter.mealTypes = mealType;
 
-  if (region) filter.region = region;
+  if (region) filter.region = foodRegionFilter(region);
 
   // Vegetarian users can also eat vegan foods
   if (diet) {

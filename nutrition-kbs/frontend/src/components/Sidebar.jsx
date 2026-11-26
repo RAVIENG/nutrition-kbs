@@ -9,16 +9,9 @@ import {
   FaFireAlt,
   FaDatabase,
   FaLightbulb,
-  FaCalendarDay,
-  FaCalendarWeek,
-  FaCarrot,
   FaRupeeSign,
-  FaSun,
-  FaExchangeAlt,
-  FaHeartbeat,
-  FaChartPie,
-  FaSave,
-  FaUserShield,
+  FaComments,
+  FaChartBar,
 } from "react-icons/fa";
 
 const sections = [
@@ -45,41 +38,14 @@ const sections = [
         label: "Recommendations",
         icon: <FaLightbulb />,
       },
+      { to: "/chat", label: "Nutrition Chat", icon: <FaComments /> },
+      { to: "/nutrition-tracking", label: "Daily Nutrition Log", icon: <FaChartBar /> },
     ],
   },
   {
     title: "Planning",
     links: [
-      { to: "/meal-planner", label: "Meal Planner", icon: <FaCalendarDay /> },
-      {
-        to: "/weekly-planner",
-        label: "Weekly Planner",
-        icon: <FaCalendarWeek />,
-      },
-      { to: "/saved-plans", label: "Saved Plans", icon: <FaSave /> },
-    ],
-  },
-  {
-    title: "Smart Features",
-    links: [
-      { to: "/kitchen", label: "My Kitchen", icon: <FaCarrot /> },
       { to: "/budget", label: "Budget Planner", icon: <FaRupeeSign /> },
-      { to: "/seasonal", label: "Seasonal Foods", icon: <FaSun /> },
-      {
-        to: "/substitution",
-        label: "Food Substitution",
-        icon: <FaExchangeAlt />,
-      },
-      {
-        to: "/nutrition-awareness",
-        label: "Nutrition Awareness",
-        icon: <FaHeartbeat />,
-      },
-      {
-        to: "/nutrition-analysis",
-        label: "Nutrition Analysis",
-        icon: <FaChartPie />,
-      },
     ],
   },
 ];
@@ -112,11 +78,6 @@ export default function Sidebar({ open, onClose }) {
         {user?.role === "admin" && (
           <div style={{ marginTop: "25px" }}>
             <div className="nav-section">Admin</div>
-
-            <NavLink to="/admin" onClick={onClose}>
-              <FaUserShield /> Admin Dashboard
-            </NavLink>
-
             <NavLink
               to="/admin/usda-import"
               onClick={onClose}

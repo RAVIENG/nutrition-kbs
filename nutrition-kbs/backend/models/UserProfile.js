@@ -8,6 +8,17 @@ import {
   INDIAN_STATES,
 } from "../utils/constants.js";
 
+const nutritionTargetsSchema = new mongoose.Schema(
+  {
+    calories: { type: Number, min: 500, max: 10000 },
+    protein: { type: Number, min: 1, max: 500 },
+    carbs: { type: Number, min: 1, max: 1000 },
+    fat: { type: Number, min: 1, max: 500 },
+    fiber: { type: Number, min: 1, max: 150 },
+  },
+  { _id: false },
+);
+
 const userProfileSchema = new mongoose.Schema(
   {
     user: {
@@ -42,6 +53,7 @@ const userProfileSchema = new mongoose.Schema(
     preferredRegionalFoods: [
       { type: String, trim: true, lowercase: true, maxlength: 40 },
     ],
+    nutritionTargets: { type: nutritionTargetsSchema, default: undefined },
     state: { type: String, enum: INDIAN_STATES },
   },
   { timestamps: true },

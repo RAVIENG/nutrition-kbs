@@ -31,10 +31,12 @@ export default function ForgotPassword() {
         {message && (
           <div className="alert alert-success py-2">
             {message}
-            <div className="small mt-1">
-              Demo version: the link is printed in the backend terminal instead
-              of being emailed.
-            </div>
+            {import.meta.env.DEV && (
+              <div className="small mt-1">
+                Development mode: the reset link is printed in the backend
+                terminal. This delivery method is disabled on hosted services.
+              </div>
+            )}
           </div>
         )}
         <div className="mb-3">

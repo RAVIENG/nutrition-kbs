@@ -64,6 +64,15 @@ export const foodRules = [
     .isArray()
     .withMessage("Allergens must be a list"),
   body("allergens.*").isIn(ALLERGENS).withMessage("Unknown allergen"),
+  body("ingredients")
+    .optional()
+    .isArray({ max: 40 })
+    .withMessage("Ingredients must be a list of at most 40 items"),
+  body("ingredients.*")
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 80 })
+    .withMessage("Each ingredient must be 1-80 characters"),
   body("serving.description")
     .trim()
     .notEmpty()

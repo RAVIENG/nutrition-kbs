@@ -1,9 +1,30 @@
+import { useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 
 import { prettify, DIET_COLOR } from "../utils/format";
+import { logCatalogFoods } from "../utils/nutritionTracking";
 
-export default function RecommendationCard({ item, rank }) {
+export default function RecommendationCard({ item, rank, mealType }) {
+  const [adding, setAdding] = useState(false);
+  const [status, setStatus] = useState("");
   const { food, serving, nutrition: n, price } = item;
+
+  const addToLog = async () => {
+    setAdding(true);
+    setStatus("");
+    try {
+      await logCatalogFoods([{
+        foodId: food.id,
+        mealType: mealType || food.mealTypes?.[0] || "lunch",
+        quantity: serving.grams,
+      }]);
+      setStatus("Added to today’s nutrition log.");
+    } catch (error) {
+      setStatus(error.response?.data?.message || "Could not add this food to your log.");
+    } finally {
+      setAdding(false);
+    }
+  };
 
   const tiles = [
     ["Calories", `${n.calories} kcal`],
@@ -110,6 +131,12 @@ export default function RecommendationCard({ item, rank }) {
 
       <div className="small text-muted mt-3">
         Source: {food.source || "Food database"}
+      </div>
+      <div className="d-flex align-items-center gap-2 mt-3">
+        <button type="button" className="btn btn-sm btn-outline-primary" onClick={addToLog} disabled={adding}>
+          {adding ? "Adding..." : "Add consumed food to today’s log"}
+        </button>
+        {status && <span className="small text-muted" role="status">{status}</span>}
       </div>
     </div>
   );

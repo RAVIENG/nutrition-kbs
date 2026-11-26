@@ -10,6 +10,11 @@ import { calculateBMI } from "./bmiService.js";
 import { calculateCalories } from "./calorieService.js";
 import { attachPrices } from "./foodService.js";
 import { runRules } from "./ruleEngine.js";
+import { isWithinServingBudget } from "../utils/recommendationFilters.js";
+import {
+  filterRecommendationCandidates,
+  normalizeRecommendationFood,
+} from "../utils/recommendationSafety.js";
 
 const REQUIRED_PROFILE_FIELDS = [
   "age",
@@ -24,11 +29,6 @@ const REQUIRED_PROFILE_FIELDS = [
 const MAX_PER_GROUP = 3;
 
 const spaced = (text) => String(text ?? "").replace(/_/g, " ");
-
-const normalize = (value) =>
-  String(value ?? "")
-    .trim()
-    .toLowerCase();
 
 export const generateRecommendations = async (user, rawRequest = {}) => {
   const trace = [];
@@ -138,12 +138,10 @@ export const generateRecommendations = async (user, rawRequest = {}) => {
   const views = await attachPrices(foodDocuments);
 
   const candidates = views.map((food) => ({
-    ...food,
+    ...normalizeRecommendationFood(food),
 
-    // USDA and locally seeded foods use the same view.
-    // Price can be null when no FoodPrice record exists.
-    allergens: food.allergens ?? [],
-
+    // These broad keywords remain useful for ranking rules. Safety restrictions
+    // use explicit food-name/ingredient terms instead of category metadata.
     keywords: [
       food.name,
       food.foodGroup,
@@ -193,6 +191,24 @@ export const generateRecommendations = async (user, rawRequest = {}) => {
     detail: `${excluded.length} foods excluded. ${kept.length} foods remaining.`,
   });
 
+  // A requested budget is a hard cap. Unknown prices cannot be confirmed affordable.
+  const budgetExcluded =
+    request.maxPricePerServing === undefined
+      ? []
+      : candidates.filter(
+          (food) => !isWithinServingBudget(food, request.maxPricePerServing),
+        );
+  const budgetExcludedIds = new Set(
+    budgetExcluded.map((food) => String(food.id)),
+  );
+
+  if (request.maxPricePerServing !== undefined) {
+    trace.push({
+      title: "Applied budget cap",
+      detail: `Excluded ${budgetExcluded.length} foods that exceed ₹${request.maxPricePerServing} per serving or have no price data.`,
+    });
+  }
+
   if (notTriggered.length) {
     trace.push({
       title: "Rules not triggered",
@@ -204,41 +220,46 @@ export const generateRecommendations = async (user, rawRequest = {}) => {
 
   // Never rely only on database rules for allergy and diet safety.
 
-  const safe = kept.filter(({ food }) => {
-    const foodAllergens = (food.allergens ?? []).map(normalize);
+  // A missing or over-budget price is an affordability rejection, not a
+  // dietary/allergy safety rejection.
+  const { safe, safetyRejected, budgetRejected } = filterRecommendationCandidates(
+    kept,
+    profile,
+    budgetExcludedIds,
+  );
 
-    const userAllergies = profile.allergies.map(normalize);
-
-    const hasAllergy = userAllergies.some((allergy) =>
-      foodAllergens.includes(allergy),
-    );
-
-    const compatibleDiet = allowed.includes(food.dietType);
-
-    const restrictionText = [
-      food.name,
-      food.foodGroup,
-      ...(food.keywords ?? []),
-    ]
-      .join(" ")
-      .toLowerCase();
-
-    const hasRestriction = profile.restrictions.some((restriction) =>
-      restrictionText.includes(normalize(restriction)),
-    );
-
-    return !hasAllergy && compatibleDiet && !hasRestriction;
-  });
-
-  if (safe.length !== kept.length) {
+  if (safetyRejected.length) {
+    const reasonCounts = safetyRejected.reduce((counts, item) => {
+      for (const reason of item.reasons) counts[reason] = (counts[reason] ?? 0) + 1;
+      return counts;
+    }, {});
     trace.push({
       title: "Safety net",
-      detail: `Removed ${kept.length - safe.length} additional unsafe foods.`,
+      detail: `Rejected ${safetyRejected.length} foods after independent checks (${Object.entries(reasonCounts)
+        .map(([reason, count]) => `${reason}: ${count}`)
+        .join(", ")}).`,
     });
 
     console.warn(
-      `[SAFETY NET] ${kept.length - safe.length} unsafe food(s) removed. Check recommendation rules.`,
+      `[SAFETY NET] ${safetyRejected.length} food(s) rejected by independent diet, allergy, or restriction checks.`,
     );
+
+    if (process.env.NODE_ENV === "development") {
+      const diagnostics = safetyRejected.map(({ food, reasons }) => ({
+        foodId: String(food.id ?? food._id ?? "unknown"),
+        foodName: food.name ?? "Unnamed food",
+        source: food.fdcId != null ? "usda" : "local_catalogue",
+        reasons,
+      }));
+      console.warn(`[SAFETY NET DETAILS] ${JSON.stringify(diagnostics)}`);
+    }
+  }
+
+  if (budgetRejected.length) {
+    trace.push({
+      title: "Budget verification",
+      detail: `Excluded ${budgetRejected.length} additional foods because their price exceeded the requested cap or was unavailable.`,
+    });
   }
 
   // STEP 10: RANK FOODS
@@ -334,7 +355,22 @@ export const generateRecommendations = async (user, rawRequest = {}) => {
 
   const byRule = {};
 
-  for (const { food, rule } of excluded) {
+  const reportedBudgetIds = new Set(
+    excluded
+      .filter(({ rule }) => rule.key === "budget-limit")
+      .map(({ food }) => String(food.id)),
+  );
+  const allExcluded = [
+    ...excluded,
+    ...budgetExcluded
+      .filter((food) => !reportedBudgetIds.has(String(food.id)))
+      .map((food) => ({
+      food,
+      rule: { key: "budget-limit", name: "Budget limit" },
+      })),
+  ];
+
+  for (const { food, rule } of allExcluded) {
     if (!byRule[rule.key]) {
       byRule[rule.key] = {
         rule: {

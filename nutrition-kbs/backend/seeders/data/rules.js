@@ -82,8 +82,8 @@ const rules = [
 
     match: [
       {
-        field: "food.keywords",
-        op: "textMatchesAny",
+        field: "food.restrictionTerms",
+        op: "intersects",
         value: {
           ref: "profile.restrictions",
         },
@@ -98,11 +98,12 @@ const rules = [
   {
     key: "budget-limit",
     name: "Budget limit",
-    type: "score",
+    type: "filter",
     priority: 40,
-    weight: -40,
+    locked: true,
+    weight: 0,
 
-    ifThen: "IF a food exceeds the user's budget THEN rank it lower",
+    ifThen: "IF a food exceeds the user's budget THEN exclude it",
 
     when: [
       {
