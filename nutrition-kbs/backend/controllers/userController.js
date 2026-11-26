@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import UserProfile from "../models/UserProfile.js";
 import Recommendation from "../models/Recommendation.js";
+import DailyNutritionLog from "../models/DailyNutritionLog.js";
 
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -29,6 +30,7 @@ const ALLOWED_FIELDS = [
   "restrictions",
   "healthGoal",
   "preferredRegionalFoods",
+  "nutritionTargets",
   "state",
 ];
 
@@ -166,6 +168,8 @@ export const deleteAccount = asyncHandler(async (req, res) => {
   await UserProfile.deleteOne({
     user: user._id,
   });
+
+  await DailyNutritionLog.deleteMany({ user: user._id });
 
   // Delete the user account
   await User.deleteOne({

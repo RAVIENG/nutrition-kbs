@@ -6,8 +6,8 @@ const connectDB = async () => {
     console.log(
       `MongoDB connected: ${conn.connection.host}/${conn.connection.name}`,
     );
-  } catch (error) {
-    console.error(`MongoDB connection failed: ${error.message}`);
+  } catch {
+    console.error("MongoDB connection failed; verify MONGO_URI and database network access.");
     process.exit(1); // stop the app: it cannot work without a database
   }
 };

@@ -162,6 +162,7 @@ export default function USDAFoodImport() {
 
   // USDA search
   useEffect(() => {
+    const controller = new AbortController();
     const search = async () => {
       if (activeTab !== "usda" || query.trim().length < 2) {
         setResults([]);
@@ -178,6 +179,7 @@ export default function USDAFoodImport() {
             q: query.trim(),
             page,
           },
+          signal: controller.signal,
         });
 
         const data = response.data;
@@ -195,7 +197,10 @@ export default function USDAFoodImport() {
 
     const timer = setTimeout(search, 500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query, page, activeTab]);
 
   // Scroll to USDA import form after selecting a food

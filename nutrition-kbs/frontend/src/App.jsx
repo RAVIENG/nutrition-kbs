@@ -24,6 +24,9 @@ import FoodDatabase from "./pages/FoodDatabase";
 import USDAFoodImport from "./pages/USDAFoodImport";
 
 import Recommendations from "./pages/Recommendations";
+import NutritionChat from "./pages/NutritionChat";
+import BudgetPlanner from "./pages/BudgetPlanner";
+import DailyNutritionTracking from "./pages/DailyNutritionTracking";
 
 // Normal application pages
 const appRoutes = [
@@ -32,11 +35,6 @@ const appRoutes = [
     path: "kitchen/suggestions",
     title: "Kitchen Recipe Suggestions",
     phase: "Phase 9",
-  },
-  {
-    path: "budget",
-    title: "Budget-Based Diet Planner",
-    phase: "Phase 10",
   },
   {
     path: "seasonal",
@@ -134,6 +132,9 @@ export default function App() {
 
           {/* Phase 8 - Actual Recommendations Page */}
           <Route path="/recommendations" element={<Recommendations />} />
+          <Route path="/chat" element={<NutritionChat />} />
+          <Route path="/budget" element={<BudgetPlanner />} />
+          <Route path="/nutrition-tracking" element={<DailyNutritionTracking />} />
 
           {/* Other Application Pages */}
           {appRoutes.map((r) => (

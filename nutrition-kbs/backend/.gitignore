@@ -37,5 +37,9 @@ desktop.ini
 # Testing
 coverage/
 
-# Backend uploads
-backend/uploads/
+# Local uploads and request/test artifacts (patterns are relative to this directory)
+uploads/
+body.json
+cookies.txt
+profile.json
+usda-import.json

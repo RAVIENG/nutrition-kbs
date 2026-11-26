@@ -35,6 +35,7 @@ export const toFoodView = (food, priceDoc) => ({
   foodGroup: food.foodGroup,
   dietType: food.dietType,
   allergens: food.allergens ?? [],
+  ingredients: food.ingredients ?? [],
   region: food.region,
 
   serving: food.serving,

@@ -11,23 +11,23 @@ export default function useProfile() {
   });
 
   useEffect(() => {
-    Promise.all([api.get("/users/profile"), api.get("/users/options")])
-      .then(([profRes, optRes]) =>
+    let active = true;
+    Promise.allSettled([api.get("/users/profile"), api.get("/users/options")])
+      .then(([profileResult, optionsResult]) => {
+        if (!active) return;
+        const profileLoaded = profileResult.status === "fulfilled";
+        const optionsLoaded = optionsResult.status === "fulfilled";
+        const failures = [profileResult, optionsResult]
+          .filter((result) => result.status === "rejected")
+          .map((result) => result.reason.userMessage || result.reason.message);
         setState({
-          profile: profRes.data.profile,
-          options: optRes.data.options,
+          profile: profileLoaded ? profileResult.value.data.profile : null,
+          options: optionsLoaded ? optionsResult.value.data.options : null,
           loading: false,
-          error: "",
-        }),
-      )
-      .catch((err) =>
-        setState({
-          profile: null,
-          options: null,
-          loading: false,
-          error: err.message,
-        }),
-      );
+          error: failures.join(" "),
+        });
+      });
+    return () => { active = false; };
   }, []);
 
   return state;

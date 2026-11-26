@@ -14,7 +14,7 @@ const run = async () => {
     const result = await RecommendationRule.updateOne(
       { key: rule.key },
 
-      reset ? { $set: rule } : { $setOnInsert: rule },
+      reset || rule.locked ? { $set: rule } : { $setOnInsert: rule },
 
       {
         upsert: true,
@@ -30,7 +30,7 @@ const run = async () => {
   console.log(
     reset
       ? `Reset ${rules.length} default rules to their original values.`
-      : `Seeded rules: ${created} new, ${rules.length - created} already existed (left unchanged).`,
+      : `Seeded ${created} new rules and synchronized locked safety rules; unlocked existing rules were left unchanged.`,
   );
 
   await mongoose.disconnect();

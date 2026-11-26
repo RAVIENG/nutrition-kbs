@@ -66,6 +66,14 @@ const foodItemSchema = new mongoose.Schema(
 
     allergens: [{ type: String, enum: ALLERGENS }],
 
+    // Optional, explicitly supplied ingredients used for personal restrictions.
+    // Prepared-dish ingredients are not inferred from nutrition or food names.
+    ingredients: {
+      type: [{ type: String, trim: true, lowercase: true, maxlength: 80 }],
+      default: undefined,
+      validate: [(values) => values.length <= 40, "A food can list at most 40 ingredients"],
+    },
+
     serving: {
       description: { type: String, required: true, trim: true },
       grams: { type: Number, required: true, min: 1, max: 2000 },

@@ -309,7 +309,11 @@ export default function Recommendations() {
             <div className="row g-3">
               {result.recommendations.map((item, index) => (
                 <div className="col-lg-6" key={item.food.id}>
-                  <RecommendationCard item={item} rank={index + 1} />
+                  <RecommendationCard
+                    item={item}
+                    rank={index + 1}
+                    mealType={form.mealType || item.food.mealTypes?.[0]}
+                  />
                 </div>
               ))}
             </div>

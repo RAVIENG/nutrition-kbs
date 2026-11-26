@@ -10,8 +10,14 @@ import {
   ALLERGENS,
 } from "../utils/constants.js";
 import { toFoodView } from "../services/foodService.js";
+import {
+  normalizeAllergen,
+  normalizeDietType,
+  normalizeFoodIngredients,
+} from "../utils/recommendationSafety.js";
 
 const USDA_BASE_URL = "https://api.nal.usda.gov/fdc/v1";
+const USDA_TIMEOUT_MS = 15_000;
 
 // Use nutrition-focused datasets.
 // Branded products are excluded because their serving data can differ.
@@ -21,7 +27,7 @@ const getApiKey = () => {
   const key = process.env.USDA_API_KEY?.trim();
 
   if (!key) {
-    throw new ApiError(500, "USDA_API_KEY is missing from backend .env");
+    throw new ApiError(503, "USDA FoodData Central is not configured.");
   }
 
   return key;
@@ -38,8 +44,12 @@ const usdaRequest = async (path, method = "GET", body) => {
       method,
       headers: body ? { "Content-Type": "application/json" } : undefined,
       body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(USDA_TIMEOUT_MS),
     });
-  } catch {
+  } catch (error) {
+    if (error.name === "TimeoutError" || error.name === "AbortError") {
+      throw new ApiError(504, "USDA took too long to respond. Try again.");
+    }
     throw new ApiError(502, "Could not connect to USDA FoodData Central.");
   }
 
@@ -199,6 +209,7 @@ export const importUSDAFood = asyncHandler(async (req, res) => {
 
   // Validate the admin-provided classification.
   const { category, mealTypes, foodGroup, dietType } = req.body;
+  const normalizedDietType = normalizeDietType(dietType);
 
   if (!FOOD_CATEGORIES.includes(category)) {
     throw new ApiError(400, "Select a valid food category.");
@@ -216,7 +227,7 @@ export const importUSDAFood = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Select a valid food group.");
   }
 
-  if (!DIETARY_PREFERENCES.includes(dietType)) {
+  if (!DIETARY_PREFERENCES.includes(normalizedDietType)) {
     throw new ApiError(400, "Select a valid dietary type.");
   }
 
@@ -224,10 +235,23 @@ export const importUSDAFood = asyncHandler(async (req, res) => {
 
   if (
     !Array.isArray(allergens) ||
-    allergens.some((value) => !ALLERGENS.includes(value))
+    allergens.some((value) => !ALLERGENS.includes(normalizeAllergen(value)))
   ) {
     throw new ApiError(400, "One or more allergens are invalid.");
   }
+  const normalizedAllergens = [...new Set(allergens.map(normalizeAllergen))];
+
+  const ingredients = req.body.ingredients ?? [];
+  if (
+    !Array.isArray(ingredients) ||
+    ingredients.length > 40 ||
+    ingredients.some(
+      (value) => typeof value !== "string" || !value.trim() || value.trim().length > 80,
+    )
+  ) {
+    throw new ApiError(400, "Ingredients must be a list of up to 40 named items.");
+  }
+  const normalizedIngredients = normalizeFoodIngredients(ingredients);
 
   const region = req.body.region || "Pan-India";
 
@@ -305,8 +329,9 @@ export const importUSDAFood = asyncHandler(async (req, res) => {
       category,
       mealTypes,
       foodGroup,
-      dietType,
-      allergens,
+      dietType: normalizedDietType,
+      allergens: normalizedAllergens,
+      ingredients: normalizedIngredients,
       serving: {
         description: serving.description.trim(),
         grams: Number(serving.grams),

@@ -35,6 +35,11 @@ export const errorHandler = (err, req, res, next) => {
     message = "Something went wrong";
   }
 
+  if (statusCode >= 500 && process.env.NODE_ENV === "development") {
+    const path = (req.originalUrl || req.url || "").split("?", 1)[0];
+    const provider = /\b(Gemini|FoodTales|USDA)\b/i.exec(message)?.[1];
+    console.warn(`[API ERROR] ${req.method} ${path} status=${statusCode} source=${provider || "backend"}`);
+  }
   if (statusCode === 500) console.error(err);
 
   res.status(statusCode).json({

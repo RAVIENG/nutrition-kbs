@@ -1,5 +1,6 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
+import { createRateLimitHandler } from "../utils/apiRateLimit.js";
 import {
   register,
   login,
@@ -22,6 +23,7 @@ const router = express.Router();
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
+  handler: createRateLimitHandler("auth"),
   message: {
     success: false,
     message: "Too many attempts, try again in 15 minutes",

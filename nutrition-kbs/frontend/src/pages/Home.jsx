@@ -1,37 +1,42 @@
 import { Link } from "react-router-dom";
 import {
   FaWallet,
-  FaCarrot,
-  FaSun,
-  FaExchangeAlt,
-  FaHeartbeat,
+  FaLightbulb,
+  FaDatabase,
+  FaChartBar,
+  FaComments,
 } from "react-icons/fa";
 
 const features = [
   {
-    icon: <FaCarrot />,
-    title: "What Is in My Kitchen?",
-    text: "Enter the ingredients you have and get Indian recipe suggestions.",
+    to: "/recommendations",
+    icon: <FaLightbulb />,
+    title: "Personalized Food Recommendations",
+    text: "Get food suggestions based on your health goals, dietary preferences and regional food choices.",
   },
   {
+    to: "/foods",
+    icon: <FaDatabase />,
+    title: "Food Nutrition Explorer",
+    text: "Explore foods and their nutritional values using our food database.",
+  },
+  {
+    to: "/nutrition-tracking",
+    icon: <FaChartBar />,
+    title: "Daily Nutrition Tracker",
+    text: "Track daily calories, protein, carbohydrates, fats and other nutrients.",
+  },
+  {
+    to: "/chat",
+    icon: <FaComments />,
+    title: "AI Nutrition Assistant",
+    text: "Get personalized nutrition guidance and answers to food-related questions.",
+  },
+  {
+    to: "/budget",
     icon: <FaWallet />,
     title: "Budget Diet Planner",
-    text: "Meal plans that fit your daily or weekly food budget.",
-  },
-  {
-    icon: <FaSun />,
-    title: "Seasonal Foods",
-    text: "Fruits and vegetables suited to the season and your region.",
-  },
-  {
-    icon: <FaExchangeAlt />,
-    title: "Smart Substitution",
-    text: "Find alternatives when a food is unavailable or too costly.",
-  },
-  {
-    icon: <FaHeartbeat />,
-    title: "Nutrition Awareness",
-    text: "Spot possible gaps in your food log, with food-source ideas.",
+    text: "Generate meal plans according to your daily or weekly food budget.",
   },
 ];
 
@@ -64,11 +69,11 @@ export default function Home() {
         <div className="row g-4">
           {features.map((f) => (
             <div className="col-md-6 col-lg-4" key={f.title}>
-              <div className="card-soft hoverable h-100">
+              <Link to={f.to} className="card-soft hoverable h-100 d-block text-decoration-none text-reset">
                 <div className="stat-icon mb-3">{f.icon}</div>
                 <h5 className="fw-semibold">{f.title}</h5>
                 <p className="text-muted mb-0">{f.text}</p>
-              </div>
+              </Link>
             </div>
           ))}
         </div>

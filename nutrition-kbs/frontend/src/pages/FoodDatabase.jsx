@@ -52,6 +52,7 @@ export default function FoodDatabase() {
   // Existing MongoDB food search
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
 
     const timer = setTimeout(() => {
       setLoading(true);
@@ -71,7 +72,7 @@ export default function FoodDatabase() {
       if (filters.region) params.region = filters.region;
 
       api
-        .get("/foods", { params })
+        .get("/foods", { params, signal: controller.signal })
         .then((res) => {
           if (!cancelled) {
             setData(res.data);
@@ -117,6 +118,7 @@ export default function FoodDatabase() {
             q: query,
             page: usdaPage,
           },
+          signal: controller.signal,
         })
         .then((res) => {
           if (!cancelled) {
@@ -137,6 +139,7 @@ export default function FoodDatabase() {
     return () => {
       cancelled = true;
       clearTimeout(timer);
+      controller.abort();
     };
   }, [filters.q, usdaPage]);
 

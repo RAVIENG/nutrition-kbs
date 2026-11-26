@@ -44,6 +44,13 @@ export const profileRules = [
     .withMessage("Invalid health goal"),
   body("state").optional().isIn(INDIAN_STATES).withMessage("Invalid state"),
 
+  body("nutritionTargets").optional().isObject().withMessage("Nutrition targets must be an object"),
+  body("nutritionTargets.calories").optional().isFloat({ min: 500, max: 10000 }).withMessage("Calorie target must be 500-10000").toFloat(),
+  body("nutritionTargets.protein").optional().isFloat({ min: 1, max: 500 }).withMessage("Protein target must be 1-500 g").toFloat(),
+  body("nutritionTargets.carbs").optional().isFloat({ min: 1, max: 1000 }).withMessage("Carbohydrate target must be 1-1000 g").toFloat(),
+  body("nutritionTargets.fat").optional().isFloat({ min: 1, max: 500 }).withMessage("Fat target must be 1-500 g").toFloat(),
+  body("nutritionTargets.fiber").optional().isFloat({ min: 1, max: 150 }).withMessage("Fibre target must be 1-150 g").toFloat(),
+
   body("allergies")
     .optional()
     .isArray({ max: 20 })
